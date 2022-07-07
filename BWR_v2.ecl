@@ -101,9 +101,9 @@ meses2_rec := RECORD
 	  unsigned receita:=sum(GROUP,meses.order_delivery_cost);
 	END;
 
-meses2 := SORT(TABLE(meses,meses2_rec,hub_id,ano_mes),hub_id);
+meses2 := SORT(TABLE(meses,meses2_rec,hub_id,ano_mes),-hub_id);
 
-// output(meses2);
+output(meses2);
 
 n_meses_rec := RECORD
 		meses2.hub_id;
