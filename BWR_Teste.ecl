@@ -1,1 +1,4 @@
-﻿EXPORT BWR_teste := 'todo';
+﻿IMPORT $;
+
+Hub := $.File_hubs.File;
+hub;

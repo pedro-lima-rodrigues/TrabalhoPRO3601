@@ -6,11 +6,13 @@
 orders := $.File_orders.File;
 deliveries := $.File_deliveries.File;
 stores := $.File_stores.File;
+hubs := $.File_hubs.File;
 
 orders_finished := orders(order_status='FINISHED');
 
-output(orders_finished);
-deliveries;
+// output(orders_finished);
+// deliveries;
+output(sum(orders_finished,orders_finished.order_delivery_cost));
 
 // JUNCAO COM A DELIVERIES
 
@@ -33,10 +35,11 @@ END;
 Join1:= JOIN(orders_finished,deliveries,
                 LEFT.delivery_order_id=RIGHT.delivery_order_id, 
                 MyJoin(LEFT, RIGHT),
-                ALL);
+                LEFT OUTER, LOOKUP);
 
 // output(sort(deliveries,delivery_order_id));
 // output(sort(Join1,delivery_order_id));
+output(sum(join1,join1.order_delivery_cost));
 
 // JUNCAO COM A STORES
 
@@ -53,6 +56,27 @@ END;
 Join2 := JOIN(join1,stores,
                 LEFT.store_id=RIGHT.store_id, 
                 MyJoin2(LEFT, RIGHT),
-                ALL);
+                LEFT OUTER, LOOKUP);
+                
+output(sum(join2,join2.order_delivery_cost));                
+// OUTPUT(join2,,'~class::plr::trabalho::inicial',overwrite);
 
-OUTPUT(join2,,'~class::plr::trabalho::inicial',overwrite);
+// JUNCAO COM A HUB
+
+join3_rec := RECORD
+  hubs.hub_city;
+  join2;                  
+END;
+
+join3_rec MyJoin3(join2 Le, hubs Ri):= TRANSFORM
+  SELF:=Le;
+  SELF:=Ri;
+END;
+
+Join3 := JOIN(join2,hubs,
+                LEFT.hub_id=RIGHT.hub_id, 
+                MyJoin3(LEFT, RIGHT),
+                LEFT OUTER, LOOKUP);
+
+OUTPUT(join3,,'~class::plr::trabalho::inicial',overwrite);
+output(sum(join3,join3.order_delivery_cost));
