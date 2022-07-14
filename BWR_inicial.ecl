@@ -9,15 +9,18 @@ stores := $.File_stores.File;
 
 orders_finished := orders(order_status='FINISHED');
 
-// output(orders_finished);
+output(orders_finished);
+deliveries;
 
 // JUNCAO COM A DELIVERIES
 
 join1_rec := RECORD
   orders_finished.store_id;
   orders_finished.delivery_order_id;
-  deliveries.driver_id; 
+  deliveries.driver_id;
+  deliveries.delivery_distance_meters;
   orders_finished.order_delivery_cost;
+  orders_finished.order_created_day; 
   orders_finished.order_created_month; 
   orders_finished.order_created_year; 
 END;
