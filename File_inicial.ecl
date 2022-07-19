@@ -5,6 +5,7 @@
     UNSIGNED2 store_id;
     UNSIGNED4 delivery_order_id;
     UNSIGNED3 driver_id;
+    STRING7 driver_modal;
     UNSIGNED4 delivery_distance_meters;
     REAL4 order_delivery_cost;
     UNSIGNED1 order_created_day;

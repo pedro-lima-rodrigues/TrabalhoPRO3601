@@ -8,5 +8,5 @@
     REAL8 hub_longitude;
   END;
 	EXPORT File := DATASET('~class::plr::trabalho::hubs.csv', Layout, csv(heading(1)));
-  EXPORT IDX_Hub := INDEX(File,{hub_name},'~class::plr::trabalho::key::hub');
+  EXPORT IDX_Hub := INDEX(File,{hub_name},{hub_id,hub_city,hub_state,hub_latitude,hub_longitude},'~class::plr::trabalho::key::hub');
 END;

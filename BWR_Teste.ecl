@@ -1,4 +1,3 @@
 ﻿IMPORT $;
 
-Hub := $.File_hubs.File;
-hub;
+$.FN_FetchHub('shopping');

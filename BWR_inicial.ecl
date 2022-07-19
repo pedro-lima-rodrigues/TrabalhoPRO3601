@@ -7,12 +7,13 @@ orders := $.File_orders.File;
 deliveries := $.File_deliveries.File;
 stores := $.File_stores.File;
 hubs := $.File_hubs.File;
+drivers := $.File_drivers.File;
 
 orders_finished := orders(order_status='FINISHED');
 
 // output(orders_finished);
 // deliveries;
-output(sum(orders_finished,orders_finished.order_delivery_cost));
+// output(sum(orders_finished,orders_finished.order_delivery_cost));
 
 // JUNCAO COM A DELIVERIES
 
@@ -39,44 +40,65 @@ Join1:= JOIN(orders_finished,deliveries,
 
 // output(sort(deliveries,delivery_order_id));
 // output(sort(Join1,delivery_order_id));
-output(sum(join1,join1.order_delivery_cost));
+// output(sum(join1,join1.order_delivery_cost));
 
-// JUNCAO COM A STORES
+// JUNCAO COM A DRIVERS
 
 join2_rec := RECORD
-  stores.hub_id;
-  join1;                  
+  join1;
+  drivers.driver_modal;
 END;
 
-join2_rec MyJoin2(join1 Le, stores Ri):= TRANSFORM
+join2_rec MyJoin2(join1 Le, drivers Ri):= TRANSFORM
   SELF:=Le;
   SELF:=Ri;
 END;
 
-Join2 := JOIN(join1,stores,
-                LEFT.store_id=RIGHT.store_id, 
+Join2:= JOIN(join1,drivers,
+                LEFT.driver_id=RIGHT.driver_id, 
                 MyJoin2(LEFT, RIGHT),
                 LEFT OUTER, LOOKUP);
+
+// join2;
+
+// JUNCAO COM A STORES
+
+join3_rec := RECORD
+  stores.hub_id;
+  join2;                  
+END;
+
+join3_rec MyJoin3(join2 Le, stores Ri):= TRANSFORM
+  SELF:=Le;
+  SELF:=Ri;
+END;
+
+Join3_antiga := JOIN(join2,stores,
+                LEFT.store_id=RIGHT.store_id, 
+                MyJoin3(LEFT, RIGHT),
+                LEFT OUTER, LOOKUP);
                 
-output(sum(join2,join2.order_delivery_cost));                
+join3 := join3_antiga(hub_id<>73);
+                
+// output(sum(join2,join2.order_delivery_cost));                
 // OUTPUT(join2,,'~class::plr::trabalho::inicial',overwrite);
 
 // JUNCAO COM A HUB
 
-join3_rec := RECORD
+join4_rec := RECORD
   hubs.hub_city;
-  join2;                  
+  join3;                  
 END;
 
-join3_rec MyJoin3(join2 Le, hubs Ri):= TRANSFORM
+join4_rec MyJoin4(join3 Le, hubs Ri):= TRANSFORM
   SELF:=Le;
   SELF:=Ri;
 END;
 
-Join3 := JOIN(join2,hubs,
+Join4 := JOIN(join3,hubs,
                 LEFT.hub_id=RIGHT.hub_id, 
-                MyJoin3(LEFT, RIGHT),
+                MyJoin4(LEFT, RIGHT),
                 LEFT OUTER, LOOKUP);
 
-OUTPUT(join3,,'~class::plr::trabalho::inicial',overwrite);
-output(sum(join3,join3.order_delivery_cost));
+OUTPUT(join4,,'~class::plr::trabalho::inicial',overwrite);
+// output(sum(join3,join3.order_delivery_cost));

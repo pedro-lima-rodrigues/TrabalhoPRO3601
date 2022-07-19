@@ -1,4 +1,4 @@
-IMPORT $;
+﻿IMPORT $;
 
 profit := $.File_profit.File;
 
@@ -53,6 +53,8 @@ hubsScore calculateScore(hubsAvg L) := TRANSFORM
 END;
 
 score := PROJECT(avg2,calculateScore(LEFT));
+
+score;
 
 EXPORT File_hubsScore := MODULE
 	EXPORT Layout := RECORDOF(score);

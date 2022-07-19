@@ -9,7 +9,7 @@ stores := $.File_stores.File;
 
 orders_finished := orders(order_status='FINISHED');
 
-output(sum(orders_finished,orders_finished.order_delivery_cost));
+// output(sum(orders_finished,orders_finished.order_delivery_cost));
 
 // JUNCAO COM A DELIVERIES
 
@@ -52,7 +52,7 @@ Join2 := JOIN(join1,stores,
 
 // output(sort(stores,store_id));
 // output(sort(Join2,store_id));
-output(sum(join2,join2.order_delivery_cost));
+// output(sum(join2,join2.order_delivery_cost));
 
 outrec2 := RECORD
 		join2.hub_id;
@@ -64,7 +64,7 @@ outrec2 := RECORD
 join3 := SORT(TABLE(join2,outrec2,hub_id,driver_id),hub_id);	
 
 // Output(join3);
-output(sum(join3,join3.receita));
+// output(sum(join3,join3.receita));
 // output(count(join3(hub_id=3)));
 
 outrec3 := RECORD
@@ -78,6 +78,7 @@ outrec3 := RECORD
 mytable := SORT(TABLE(join3,outrec3,hub_id),hub_id);	
 
 output(sum(mytable,mytable.receita));
+output(sum(mytable,mytable.entregadores));
 Output(mytable);
 
 
