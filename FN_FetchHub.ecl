@@ -21,6 +21,7 @@ EXPORT FN_FetchHub (STRING hub_info):= FUNCTION
     // basekey1.lucro;
     // basekey1.lucro_por_entregador;
     basekey1.score;
+    basekey1.score_bike;
 																							
 	END;
 	
@@ -34,5 +35,5 @@ EXPORT FN_FetchHub (STRING hub_info):= FUNCTION
 									MyJoin(LEFT, RIGHT),
 									ALL);
 	
-	RETURN OUTPUT(joinrecs);
+	RETURN OUTPUT(sort(joinrecs,-score));
 END;

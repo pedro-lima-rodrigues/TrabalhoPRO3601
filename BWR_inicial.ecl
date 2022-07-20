@@ -1,8 +1,5 @@
 ﻿IMPORT $;
 
-// receita por hub, numero de entregadores do hub
-// primeiro faz join com loja, dps join com hub
-
 orders := $.File_orders.File;
 deliveries := $.File_deliveries.File;
 stores := $.File_stores.File;
@@ -78,7 +75,7 @@ Join3_antiga := JOIN(join2,stores,
                 MyJoin3(LEFT, RIGHT),
                 LEFT OUTER, LOOKUP);
                 
-join3 := join3_antiga(hub_id<>73);
+join3 := join3_antiga(hub_id<>73 /*AND hub_id<>36*/);
                 
 // output(sum(join2,join2.order_delivery_cost));                
 // OUTPUT(join2,,'~class::plr::trabalho::inicial',overwrite);

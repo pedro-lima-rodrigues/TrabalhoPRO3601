@@ -36,6 +36,9 @@ END;
 
 municipios_transf := PROJECT(municipios_filtro,MyTransf(LEFT));
 
+// municipios_filtro;
+// municipios_transf;
+
 // count(municipios_transf);
 // count(municipios_transf);
 // count(municipios_transf(preco_combustivel<5));
@@ -83,16 +86,19 @@ join1_rec MyJoin(inicial_transf Le, municipios_transf Ri):= TRANSFORM
   SELF:=Ri;
 END;
 
-Join1:= JOIN(inicial_transf,municipios_transf,
+Join11:= JOIN(inicial_transf,municipios_transf,
                 LEFT.data_atual>RIGHT.data_inicial1 AND LEFT.data_atual<RIGHT.data_final1
                 AND LEFT.hub_city=RIGHT.municipio AND LEFT.driver_modal='MOTOBOY', 
                 MyJoin(LEFT, RIGHT),
-                LEFT OUTER, LOOKUP); // PROBLEMA TA AQUI
+                LEFT OUTER, LOOKUP);
                 
-// join1;
+join1:=join11(driver_modal='MOTOBOY');
+join1_biker:=join11(driver_modal='BIKER');
 // output(sum(join1,join1.order_delivery_cost));
+// output(count(join1(driver_modal='MOTOBOY')));
+// output(count(join1(driver_modal='BIKER')));
 
-// CALCULOS
+// CALCULOS - MOTOBOY
 
 rec_transf3 := RECORD
     UNSIGNED1 hub_id;
@@ -105,15 +111,17 @@ rec_transf3 := RECORD
 END;
 
 rec_transf3 MyTransf3(join1_rec Le) := TRANSFORM
-  SELF.lucro := Le.order_delivery_cost - Le.preco_combustivel/40000*Le.delivery_distance_meters; //PROBLEMA AQUI
+  SELF.lucro := (Le.order_delivery_cost - Le.preco_combustivel/40000*Le.delivery_distance_meters);
   SELF := Le;
 END;
 
 join1_transf := PROJECT(join1,MyTransf3(LEFT));
 
+// join1_transf;
+
 // output(sum(join1_transf,join1_transf.order_delivery_cost));
 
-// AGRUPAMENTO POR ENTREGADOR E HUB
+// AGRUPAMENTO POR ENTREGADOR E HUB - MOTOBOY
 
 entreg_rec := RECORD
     join1_transf.hub_id;
@@ -141,7 +149,7 @@ n_entreg := SORT(TABLE(entreg,n_entreg_rec,hub_id),hub_id);
 // OUTPUT(n_entreg,,'~class::plr::trabalho::n_entreg',overwrite);
 // output(sum(n_entreg,n_entreg.receita));
 
-// NORMALIZACAO
+// NORMALIZACAO - MOTOBOY
 
 max_lucro := MAX(n_entreg,lucro_por_entregador);
 min_lucro := MIN(n_entreg,lucro_por_entregador);
@@ -158,4 +166,69 @@ END;
 
 score := PROJECT(n_entreg,calculateScore(LEFT));
 // output(score);
-OUTPUT(score,,'~class::plr::trabalho::score',overwrite);
+// OUTPUT(score,,'~class::plr::trabalho::score',overwrite);
+
+// AGRUPAMENTO POR ENTREGADOR E HUB - BIKER
+
+entreg2_rec := RECORD
+    join1_biker.hub_id;
+    join1_biker.driver_id;
+	  unsigned lucro:=sum(GROUP,join1_biker.order_delivery_cost);
+	END;
+
+entreg2 := SORT(TABLE(join1_biker,entreg2_rec,hub_id,driver_id),hub_id);	
+// entreg2;
+
+n_entreg2_rec := RECORD
+		entreg2.hub_id;
+    unsigned entregadores_bike:=count(GROUP);
+    unsigned lucro_bike:=sum(GROUP,entreg2.lucro);
+    unsigned lucro_por_entregador_bike:=ave(GROUP,entreg2.lucro);
+	END;
+
+n_entreg2 := SORT(TABLE(entreg2,n_entreg2_rec,hub_id),hub_id);
+
+// OUTPUT(n_entreg,,'~class::plr::trabalho::n_entreg',overwrite);
+// output(sum(n_entreg,n_entreg.receita));
+
+// NORMALIZACAO - BIKER
+
+max_lucro_bike := MAX(n_entreg2,lucro_por_entregador_bike);
+min_lucro_bike := MIN(n_entreg2,lucro_por_entregador_bike);
+
+hubsScore2 := RECORD
+    RECORDOF(n_entreg2);
+    INTEGER score_bike;
+END;
+
+hubsScore2 calculateScore2(n_entreg2 L) := TRANSFORM
+  SELF.score_bike := (L.lucro_por_entregador_bike-min_lucro_bike)/(max_lucro_bike-min_lucro_bike)*1000;
+  SELF := L;
+END;
+
+score2 := PROJECT(n_entreg2,calculateScore2(LEFT));
+// output(score2);
+// OUTPUT(score,,'~class::plr::trabalho::score',overwrite);
+
+// JOIN ENTRE MOTOBOY E BIKER
+
+score_cons_rec := RECORD
+    RECORDOF(score);
+    score2.entregadores_bike;
+    score2.lucro_bike;
+    score2.lucro_por_entregador_bike;
+    score2.score_bike;
+END;
+
+score_cons_rec MyJoin2(score Le, score2 Ri):= TRANSFORM
+  SELF:=Le;
+  SELF:=Ri;
+END;
+
+score_cons:= JOIN(score,score2,
+                LEFT.hub_id=RIGHT.hub_id, 
+                MyJoin2(LEFT, RIGHT),
+                LEFT OUTER, LOOKUP);
+                
+OUTPUT(score_cons,,'~class::plr::trabalho::score',overwrite);
+output(sort(score_cons,-score));
